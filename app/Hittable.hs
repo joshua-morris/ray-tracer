@@ -3,7 +3,7 @@ module Hittable where
 import Ray
 import Vec3
 
-data HitRecord = HitRecord { p :: Vec3 Double, normal :: Vec3 Double, t :: Double }
+data HitRecord = HitRecord { p :: Vec3 Double, normal :: Vec3 Double, t :: Double, frontFace :: Bool }
 
 class Hittable a where
     hit :: a -> Ray -> Double -> Maybe Double -> Maybe HitRecord

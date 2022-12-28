@@ -9,14 +9,14 @@ import Sphere
 
 makeRay :: Double -> Double -> Double -> Double -> Camera -> Ray
 makeRay i j height width c = 
-    Ray (origin c) ((lowerLeftCorner c) + vscale u (horizontal c) + vscale v (vertical c) - (origin c)) 
+    Ray (origin c) ((lowerLeftCorner c) + scale u (horizontal c) + scale v (vertical c) - (origin c)) 
     where
         u = i / (width-1)
         v = j / (height-1)
 
 rayColour :: Hittable a => Ray -> [a] -> Vec3 Double
 rayColour ray hl = case hitAll hl ray 0 Nothing of
-    Just h -> vscale 0.5 ((normal h) + (Vec3 1 1 1))
+    Just h -> scale 0.5 ((normal h) + (Vec3 1 1 1))
     Nothing -> lerp t (Vec3 1 1 1) (Vec3 0.5 0.7 1.0)
         where
             unitRay = vnormalise (dir ray)
@@ -36,7 +36,7 @@ main = do
         viewportHeight=2.0,
         viewportWidth=aspectRatio*2.0,
         focalLength=1.0,
-        origin=vzero
+        origin=(Vec3 0 0 0)
     }
 
     let sphere1 = Sphere {

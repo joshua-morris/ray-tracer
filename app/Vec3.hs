@@ -44,3 +44,6 @@ cross (Vec3 x1 x2 x3) (Vec3 y1 y2 y3) = Vec3 (x2*y3-x3*y2) (x3*y1-x1*y3) (x1*y2-
 
 vnormalise :: (Num a, Fractional a, Floating a) => Vec3 a -> Vec3 a
 vnormalise v = scale (1/(vlength v)) v
+
+lerp :: Num a => a -> Vec3 a -> Vec3 a -> Vec3 a
+lerp t u v = scale (1-t) u + scale t v

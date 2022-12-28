@@ -1,7 +1,12 @@
-module Trace.PPM 
+module PPM 
     ( savePPM
     , makePPM 
+    , Image
     ) where
+
+import Vec3
+
+type Image = [[Vec3]]
 
 savePPM :: FilePath -> Image -> IO ()
 savePPM fp css = writeFile fp $ makePPM css

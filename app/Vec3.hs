@@ -1,4 +1,4 @@
-module Trace.Vec3 where
+module Vec3 where
 
 data Vec3 = Vec3 { x, y, z :: Double } deriving (Eq, Show)
 

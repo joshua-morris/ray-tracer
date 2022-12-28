@@ -1,4 +1,4 @@
-module Trace.Hittable where
+module Hittable where
 
 import Ray
 

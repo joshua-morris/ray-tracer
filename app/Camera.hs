@@ -1,4 +1,4 @@
-module Trace.Camera where
+module Camera where
 
 import Vec3
 

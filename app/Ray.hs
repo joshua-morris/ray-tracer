@@ -1,4 +1,4 @@
-module Trace.Ray where
+module Ray where
 
 import Vec3
 

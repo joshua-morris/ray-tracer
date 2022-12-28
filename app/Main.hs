@@ -5,8 +5,6 @@ import Ray
 import Camera
 import PPM
 
-type Image = [[Vec3]]
-
 makeRay :: Double -> Double -> Double -> Double -> Camera -> Ray
 makeRay i j height width c = 
     Ray (origin c) ((lowerLeftCorner c) + vscale u (horizontal c) + vscale v (vertical c) - (origin c)) 

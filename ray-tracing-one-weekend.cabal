@@ -30,10 +30,10 @@ executable ray-tracing-one-weekend
 
     -- Modules included in this executable, other than Main.
     other-modules:
-        Trace.Vec3,
-        Trace.Ray,
-        Trace.Camera,
-        Trace.PPM
+        Vec3,
+        Ray,
+        Camera,
+        PPM
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

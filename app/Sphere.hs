@@ -16,11 +16,14 @@ discriminant sphere ray = if d < 0 then Nothing else Just d
         d = half_b*half_b - a*c
         
 
-nearestRoot :: Sphere -> Ray -> Double -> Double -> Maybe Double
+nearestRoot :: Sphere -> Ray -> Double -> Maybe Double -> Maybe Double
 nearestRoot sphere ray tmin tmax = case discriminant sphere ray of
     Nothing -> Nothing
-    Just d -> if root1 < tmin || root1 > tmax then Just root1 else Just root2
+    Just d -> if root1 < tmin || root1max then Just root1 else Just root2
         where
+            root1max = case tmax of
+                Nothing -> False
+                Just n -> root1 > n
             oc = (orig ray) - (center sphere)
             root1 = (-half_b - (sqrt $ d)) / a
             root2 = (-half_b + (sqrt $ d)) / a

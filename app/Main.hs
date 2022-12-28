@@ -4,6 +4,8 @@ import Vec3
 import Ray
 import Camera
 import PPM
+import Hittable
+import Sphere
 
 makeRay :: Double -> Double -> Double -> Double -> Camera -> Ray
 makeRay i j height width c = 
@@ -12,21 +14,17 @@ makeRay i j height width c =
         u = i / (width-1)
         v = j / (height-1)
 
-rayColour :: Ray -> Vec3 Double
-rayColour r@(Ray orig dir) = case hitSphere r (Vec3 0 0 (-1)) 0.5 of
-    Just x -> 0.5*(Vec3 (x+1) (y+1) (z+1))
-        where
-            (Vec3 x y z) = vnormalise (rayAt r t - (Vec3 0 0 (-1)))
-            unitRay = vnormalise dir
-            t = 0.5*(vy unitRay) + 0.5
+rayColour :: Hittable a => Ray -> [a] -> Vec3 Double
+rayColour ray hl = case hitAll hl ray 0 Nothing of
+    Just h -> vscale 0.5 ((normal h) + (Vec3 1 1 1))
     Nothing -> lerp t (Vec3 1 1 1) (Vec3 0.5 0.7 1.0)
         where
-            unitRay = vnormalise dir
-            t = 0.5*(vy unitRay) + 0.5
+            unitRay = vnormalise (dir ray)
+            t = 0.5*(vy unitRay + 1)
 
-makeImage :: Double -> Double -> Camera -> Image
-makeImage height width camera = 
-    [[rayColour $ makeRay i j height width camera | i <- [0..width-1]] | j <- [height-1,height-2..0]]
+makeImage :: Hittable a => [a] -> Double -> Double -> Camera -> Image
+makeImage hl height width camera = 
+    [[rayColour (makeRay i j height width camera) hl | i <- [0..width-1]] | j <- [height-1,height-2..0]]
 
 main :: IO ()
 main = do
@@ -40,4 +38,16 @@ main = do
         focalLength=1.0,
         origin=vzero
     }
-    savePPM "image.ppm" (makeImage imageHeight imageWidth camera)
+
+    let sphere1 = Sphere {
+        center=(Vec3 0 0 (-1)),
+        radius=0.5
+    }
+    let sphere2 = Sphere {
+        center=(Vec3 0 (-100.5) (-1)),
+        radius=100
+    }
+
+    let world = [sphere1, sphere2]
+
+    savePPM "image.ppm" (makeImage world imageHeight imageWidth camera)

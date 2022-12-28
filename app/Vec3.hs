@@ -1,31 +1,34 @@
 module Vec3 where
 
-data Vec3 = Vec3 { x, y, z :: Double } deriving (Eq, Show)
+import Data.Functor
+import Data.Foldable
 
-vmap :: (Double -> Double) -> Vec3 -> Vec3
-vmap f (Vec3 r g b) = Vec3 (f r) (f g) (f b)
+data Vec3 a = Vec3 { vx, vy, vz :: a } deriving (Eq, Show)
 
-vzip :: (Double -> Double -> Double) -> Vec3 -> Vec3 -> Vec3
+instance Functor Vec3 where
+  fmap f (Vec3 x y z) = Vec3 (f x) (f y) (f z)
+
+instance Foldable Vec3 where
+  foldr f n (Vec3 x y z) = x `f` (y `f` (z `f` n))
+
+vzip :: (a -> a -> a) -> Vec3 a -> Vec3 a -> Vec3 a
 vzip f (Vec3 r1 g1 b1) (Vec3 r2 g2 b2) = Vec3 (f r1 r2) (f g1 g2) (f b1 b2)
 
-vfold :: (Double -> Double -> Double) -> Vec3 -> Double
-vfold f (Vec3 r g b) = r `f` g `f` b
-
-vpromote :: Double -> Vec3
+vpromote :: a -> Vec3 a
 vpromote x = Vec3 x x x
 
-instance Num Vec3 where
+instance Num a => Num (Vec3 a) where
   (+) = vzip (+)
   (-) = vzip (-)
   (*) = vzip (*)
-  negate = vmap negate
-  abs    = vmap abs
-  signum = vmap signum
+  negate = fmap negate
+  abs    = fmap abs
+  signum = fmap signum
   fromInteger x = vpromote (fromInteger x)
 
-instance Fractional Vec3 where
+instance Fractional a => Fractional (Vec3 a) where
   (/) = vzip (/)
-  recip = vmap recip
+  recip = fmap recip
   fromRational x = vpromote (fromRational x)
 
 clip :: (Num n, Ord n) => n -> n
@@ -34,27 +37,23 @@ clip n
   | n > 1 = 1
   | otherwise = n
 
-vclip :: Vec3 -> Vec3
-vclip = vmap clip
+vclip :: (Num a, Ord a) => Vec3 a -> Vec3 a
+vclip = fmap clip
 
-vzero :: Vec3
+vzero :: Num a => Vec3 a
 vzero = Vec3 0 0 0
 
-vscale :: Double -> Vec3 -> Vec3
-vscale k (Vec3 x y z) = Vec3 (k*x) (k*y) (k*z)
+vscale :: Num a => a -> Vec3 a -> Vec3 a
+vscale k = fmap (*k)
 
-vlength :: Vec3 -> Double
-vlength (Vec3 x y z) = sqrt (x**2 + y**2 + z**2)
+vlength :: (Num a, Fractional a, Floating a) => Vec3 a -> a
+vlength = sqrt . sum . fmap (**2)
 
-vdot :: Vec3 -> Vec3 -> Double
+vdot :: Num a => Vec3 a -> Vec3 a -> a
 vdot (Vec3 x1 x2 x3) (Vec3 y1 y2 y3) = x1*y1 + x2*y2 + x3*y3
 
-vcross :: Vec3 -> Vec3 -> Vec3
+vcross :: Num a => Vec3 a -> Vec3 a -> Vec3 a
 vcross (Vec3 x1 x2 x3) (Vec3 y1 y2 y3) = Vec3 (x2*y3-x3*y2) (x3*y1-x1*y3) (x1*y2-x2*y1)
 
-vnormalise :: Vec3 -> Vec3
+vnormalise :: (Num a, Fractional a, Floating a) => Vec3 a -> Vec3 a
 vnormalise v = vscale (1/(vlength v)) v
-
-vx (Vec3 x _ _) = x
-vy (Vec3 _ y _) = y
-vz (Vec3 _ _ z) = z

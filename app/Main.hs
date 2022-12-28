@@ -12,7 +12,7 @@ makeRay i j height width c =
         u = i / (width-1)
         v = j / (height-1)
 
-rayColour :: Ray -> Vec3
+rayColour :: Ray -> Vec3 Double
 rayColour r@(Ray orig dir) = case hitSphere r (Vec3 0 0 (-1)) 0.5 of
     Just x -> 0.5*(Vec3 (x+1) (y+1) (z+1))
         where

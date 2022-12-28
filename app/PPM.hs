@@ -6,7 +6,7 @@ module PPM
 
 import Vec3
 
-type Image = [[Vec3]]
+type Image = [[Vec3 Double]]
 
 savePPM :: FilePath -> Image -> IO ()
 savePPM fp css = writeFile fp $ makePPM css

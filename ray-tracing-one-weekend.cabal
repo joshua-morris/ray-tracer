@@ -33,7 +33,9 @@ executable ray-tracing-one-weekend
         Vec3,
         Ray,
         Camera,
-        PPM
+        PPM,
+        Sphere,
+        Hittable
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

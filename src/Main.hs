@@ -8,15 +8,16 @@ import Hittable
 import Sphere
 import Linear
 
+import Control.Lens
 import System.Random
 import Data.List
 
 rayColour :: Hittable a => Ray -> [a] -> Vec3
-rayColour ray hl = case hitAll hl ray 0 Nothing of
-    Just h -> 0.5 *^ ((normal h) + (V3 1 1 1))
+rayColour ray@(Ray orig dir) hl = case hitAll hl ray 0 Nothing of
+    Just h -> 0.5 *^ (h^.normal + (V3 1 1 1))
     Nothing -> lerp t (V3 1 1 1) (V3 0.5 0.7 1.0)
         where
-            V3 _ y _ = normalize (dir ray)
+            V3 _ y _ = normalize dir
             t = 0.5*(y + 1)
 
 generateN :: RandomGen g => Int -> g -> [Float]
@@ -39,20 +40,14 @@ main = do
     let imageHeight = imageWidth / aspectRatio
     
     let camera = Camera {
-        viewportHeight=2.0,
-        viewportWidth=aspectRatio*2.0,
-        focalLength=1.0,
-        origin=(V3 0 0 0)
+        _viewportHeight=2.0,
+        _viewportWidth=aspectRatio*2.0,
+        _focalLength=1.0,
+        _origin=(V3 0 0 0)
     }
 
-    let sphere1 = Sphere {
-        center=(V3 0 0 (-1)),
-        radius=0.5
-    }
-    let sphere2 = Sphere {
-        center=(V3 0 (-100.5) (-1)),
-        radius=100
-    }
+    let sphere1 = Sphere (V3 0 0 (-1)) 0.5
+    let sphere2 = Sphere (V3 0 (-100.5) (-1)) 100
 
     let world = [sphere1, sphere2]
 

@@ -1,6 +1,6 @@
-module Ray where
+module Rays.Ray where
 
-import Types
+import Rays.Types
 import Linear
 
 data Ray = Ray 

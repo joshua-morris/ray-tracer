@@ -1,10 +1,10 @@
-module PPM 
+module Rays.PPM 
     ( savePPM
     , makePPM 
     , Image
     ) where
 
-import Types
+import Rays.Types
 import Linear
 
 type Image = [[Vec3]]

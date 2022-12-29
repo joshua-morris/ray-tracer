@@ -1,14 +1,15 @@
-module Sphere where
+module Rays.Sphere where
 
-import Types
-import Ray
-import Hittable
+import Rays.Types
+import Rays.Ray
+import Rays.Hittable
+import Rays.Material
 import Linear
 
-data Sphere = Sphere !Vec3 !Float deriving (Eq)
+data Sphere = Sphere !Vec3 !Float !Material deriving (Eq)
 
 discriminant :: Sphere -> Ray -> Maybe Float
-discriminant (Sphere center radius) (Ray orig dir) = if d < 0 then Nothing else Just d
+discriminant (Sphere center radius _) (Ray orig dir) = if d < 0 then Nothing else Just d
     where
         oc = orig - center
         half_b = dot oc dir
@@ -22,7 +23,7 @@ isInRange root tmin Nothing = root >= tmin
 isInRange root tmin (Just tmax) = root >= tmin && root <= tmax
 
 nearestRoot :: Sphere -> Ray -> Float -> Maybe Float -> Maybe Float
-nearestRoot s@(Sphere center radius) ray@(Ray orig dir) tmin tmax = case discriminant s ray of
+nearestRoot s@(Sphere center radius _) ray@(Ray orig dir) tmin tmax = case discriminant s ray of
     Nothing -> Nothing
     Just d -> if isInRange root1 tmin tmax
                 then Just root1 
@@ -38,9 +39,9 @@ nearestRoot s@(Sphere center radius) ray@(Ray orig dir) tmin tmax = case discrim
             c = (norm oc)**2 - radius**2
 
 instance Hittable Sphere where
-    hit s@(Sphere center radius) ray@(Ray orig dir) tmin tmax = case nearestRoot s ray tmin tmax of
+    hit s@(Sphere center radius material) ray@(Ray orig dir) tmin tmax = case nearestRoot s ray tmin tmax of
         Nothing -> Nothing
-        Just root -> Just (HitRecord p normal root frontFace)
+        Just root -> Just (HitRecord p normal root frontFace material)
             where
                 normal = if frontFace then outwardNormal else -outwardNormal
                 frontFace = (dot dir outwardNormal) < 0

@@ -1,12 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Camera where
+module Rays.Camera where
 
 import Control.Lens
 
-import Types
+import Rays.Types
 import Linear
-import Ray
+import Rays.Ray
 
 data Camera = Camera 
   { _viewportHeight :: !Float

@@ -1,4 +1,4 @@
-module Types
+module Rays.Types
     ( 
       Vec3
     ) where

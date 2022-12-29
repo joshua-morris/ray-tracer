@@ -1,50 +1,56 @@
 module Main where
 
-import Vec3
+import Types
 import Ray
 import Camera
 import PPM
 import Hittable
 import Sphere
+import Linear
 
-makeRay :: Double -> Double -> Double -> Double -> Camera -> Ray
-makeRay i j height width c = 
-    Ray (origin c) ((lowerLeftCorner c) + scale u (horizontal c) + scale v (vertical c) - (origin c)) 
-    where
-        u = i / (width-1)
-        v = j / (height-1)
+import System.Random
+import Data.List
 
-rayColour :: Hittable a => Ray -> [a] -> Vec3 Double
+rayColour :: Hittable a => Ray -> [a] -> Vec3
 rayColour ray hl = case hitAll hl ray 0 Nothing of
-    Just h -> scale 0.5 ((normal h) + (Vec3 1 1 1))
-    Nothing -> lerp t (Vec3 1 1 1) (Vec3 0.5 0.7 1.0)
+    Just h -> 0.5 *^ ((normal h) + (V3 1 1 1))
+    Nothing -> lerp t (V3 1 1 1) (V3 0.5 0.7 1.0)
         where
-            unitRay = vnormalise (dir ray)
-            t = 0.5*(vy unitRay + 1)
+            V3 _ y _ = normalize (dir ray)
+            t = 0.5*(y + 1)
 
-makeImage :: Hittable a => [a] -> Double -> Double -> Camera -> Image
+generateN :: RandomGen g => Int -> g -> [Float]
+generateN n = take n . unfoldr (Just . uniformR (0, 1))
+
+antialias :: Hittable a => Int -> [a] -> Float -> Float -> Float -> Float -> Camera -> Vec3
+antialias n hl i j height width c = 
+    (1/(fromIntegral n)) *^ (sum $ [rayColour (makeRay ((i + r)/(width-1)) ((j + r)/(height-1)) c) hl | r <- generateN n pureGen])
+        where
+            pureGen = mkStdGen 42
+
+makeImage :: Hittable a => [a] -> Float -> Float -> Camera -> Image
 makeImage hl height width camera = 
-    [[rayColour (makeRay i j height width camera) hl | i <- [0..width-1]] | j <- [height-1,height-2..0]]
+    [[antialias 100 hl i j height width camera | i <- [0..width-1]] | j <- [height-1,height-2..0]]
 
 main :: IO ()
 main = do
     let aspectRatio = 16.0/9.0
-    let imageWidth = 400
+    let imageWidth = 600
     let imageHeight = imageWidth / aspectRatio
     
     let camera = Camera {
         viewportHeight=2.0,
         viewportWidth=aspectRatio*2.0,
         focalLength=1.0,
-        origin=(Vec3 0 0 0)
+        origin=(V3 0 0 0)
     }
 
     let sphere1 = Sphere {
-        center=(Vec3 0 0 (-1)),
+        center=(V3 0 0 (-1)),
         radius=0.5
     }
     let sphere2 = Sphere {
-        center=(Vec3 0 (-100.5) (-1)),
+        center=(V3 0 (-100.5) (-1)),
         radius=100
     }
 

@@ -1,8 +1,9 @@
 module Ray where
 
-import Vec3
+import Types
+import Linear
 
-data Ray = Ray { orig, dir :: Vec3 Double } deriving (Eq, Show)
+data Ray = Ray { orig, dir :: Vec3 } deriving (Eq, Show)
 
-rayAt :: Ray -> Double -> Vec3 Double
-rayAt (Ray orig dir) t = orig + scale t dir
+rayAt :: Ray -> Float -> Vec3
+rayAt (Ray orig dir) t = orig + t *^ dir

@@ -4,9 +4,10 @@ module PPM
     , Image
     ) where
 
-import Vec3
+import Types
+import Linear
 
-type Image = [[Vec3 Double]]
+type Image = [[Vec3]]
 
 savePPM :: FilePath -> Image -> IO ()
 savePPM fp css = writeFile fp $ makePPM css
@@ -21,7 +22,7 @@ group n xs =
   let (xs0,xs1) = splitAt n xs
   in  xs0 : group n xs1
 
-colour (Vec3 r g b) = [channel r, channel g, channel b]
+colour (V3 r g b) = [channel r, channel g, channel b]
 
-channel :: Double -> Int
+channel :: Float -> Int
 channel = floor . (255*) . min 1 . max 0

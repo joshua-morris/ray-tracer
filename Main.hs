@@ -15,7 +15,6 @@ import Linear
 import Control.Lens
 import System.Random
 import Control.Monad
-import Data.List
 import Control.Monad.State.Lazy
 
 rayColour :: Hittable a => Ray -> [a] -> Int -> RandomState Vec3
@@ -34,19 +33,19 @@ makeImage :: Hittable a => [a] -> Float -> Float -> Camera -> RandomState Image
 makeImage hl height width camera =
   forM [[(i,j) | i <- [0..width-1]] | j <- [height-1,height-2..0]] $ \l -> do
     forM l $ \(x,y) -> do
-      cols <- forM [1..500] $ \_ -> do
+      cols <- forM [1..25] $ \_ -> do
         r1 <- getUniformlyInRange (0,1)
         r2 <- getUniformlyInRange (0,1)
         let u = (x+r1)/(width-1)
             v = (y+r2)/(height-1)
             r = makeRay u v camera
         rayColour r hl 50
-      return $ (sum cols) / 500
+      return $ (sum cols) / 25
 
 main :: IO ()
 main = do
-  let aspectRatio = 16.0/9.0
-  let imageWidth = 600
+  let aspectRatio = 3.0/2.0
+  let imageWidth = 400
   let imageHeight = imageWidth / aspectRatio
   
   let camera = Camera {
@@ -58,7 +57,7 @@ main = do
 
   let sphere1 = Sphere (V3 0 0 (-1)) 0.5 (Matte (V3 0.7 0.3 0.3))
   let sphere2 = Sphere (V3 0 (-100.5) (-1)) 100 (Matte (V3 0.8 0.8 0.0))
-  let sphere3 = Sphere (V3 (-1) 0 (-1)) 0.5 (Metal (V3 0.8 0.8 0.8) 0.3)
+  let sphere3 = Sphere (V3 (-1) 0 (-1)) (-0.4) (Glass 1.5)
   let sphere4 = Sphere (V3 1 0 (-1)) 0.5 (Metal (V3 0.8 0.6 0.2) 0.1)
 
   let world = [sphere1, sphere2, sphere3, sphere4]

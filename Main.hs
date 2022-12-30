@@ -33,34 +33,30 @@ makeImage :: Hittable a => [a] -> Float -> Float -> Camera -> RandomState Image
 makeImage hl height width camera =
   forM [[(i,j) | i <- [0..width-1]] | j <- [height-1,height-2..0]] $ \l -> do
     forM l $ \(x,y) -> do
-      cols <- forM [1..25] $ \_ -> do
+      cols <- forM [1..500] $ \_ -> do
         r1 <- getUniformlyInRange (0,1)
         r2 <- getUniformlyInRange (0,1)
         let u = (x+r1)/(width-1)
             v = (y+r2)/(height-1)
             r = makeRay u v camera
         rayColour r hl 50
-      return $ (sum cols) / 25
+      return $ (sum cols) / 500
 
 main :: IO ()
 main = do
-  let aspectRatio = 3.0/2.0
-  let imageWidth = 400
+  let aspectRatio = 16.0/9.0
+  let imageWidth = 800
   let imageHeight = imageWidth / aspectRatio
   
-  let camera = Camera {
-      _viewportHeight=2.0,
-      _viewportWidth=aspectRatio*2.0,
-      _focalLength=1.0,
-      _origin=(V3 0 0 0)
-  }
+  let camera = cameraBuilder 20 aspectRatio (V3 (-2) 2 1) (V3 0 0 (-1)) (V3 0 1 0)
 
-  let sphere1 = Sphere (V3 0 0 (-1)) 0.5 (Matte (V3 0.7 0.3 0.3))
+  let sphere1 = Sphere (V3 0 0 (-1)) 0.5 (Matte (V3 0.1 0.2 0.5))
   let sphere2 = Sphere (V3 0 (-100.5) (-1)) 100 (Matte (V3 0.8 0.8 0.0))
-  let sphere3 = Sphere (V3 (-1) 0 (-1)) (-0.4) (Glass 1.5)
-  let sphere4 = Sphere (V3 1 0 (-1)) 0.5 (Metal (V3 0.8 0.6 0.2) 0.1)
+  let sphere3 = Sphere (V3 (-1) 0 (-1)) (0.5) (Glass 1.5)
+  let sphere4 = Sphere (V3 (-1) 0 (-1)) (-0.45) (Glass 1.5)
+  let sphere5 = Sphere (V3 1 0 (-1)) 0.5 (Metal (V3 0.8 0.6 0.2) 0.0)
 
-  let world = [sphere1, sphere2, sphere3, sphere4]
+  let world = [sphere1, sphere2, sphere3, sphere4, sphere5]
 
   gen <- initStdGen
   let image = evalState (makeImage world imageHeight imageWidth camera) gen

@@ -20,3 +20,6 @@ reflectance :: Fractional a => a -> a -> a
 reflectance cosine refIdx = r0 + (1-r0)*(1-cosine)^5
   where
     r0 = ((1-refIdx)/(1+refIdx))^2
+
+degreesToRadians :: Float -> Float
+degreesToRadians degrees = degrees * pi / 180

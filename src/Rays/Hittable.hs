@@ -3,6 +3,7 @@
 module Rays.Hittable where
 
 import Control.Lens
+import Data.List
 import Linear
 
 import Rays.Ray
@@ -11,7 +12,7 @@ import Rays.Types
 import Rays.Material
 import Rays.Util
 
-data HitRecord = HitRecord 
+data HitRecord = HitRecord
   { _p :: Vec3
   , _normal :: Vec3
   , _t :: Float
@@ -30,7 +31,7 @@ minDistance Nothing b = b
 minDistance (Just a) (Just b) = if a^.t < b^.t then Just a else Just b
 
 hitAll :: Hittable a => [a] -> Ray -> Float -> Maybe Float -> Maybe HitRecord
-hitAll hl ray tmin tmax = foldr minDistance Nothing $ map (\x -> hit x ray tmin tmax) hl
+hitAll hl ray tmin tmax = foldl' (\y x -> minDistance (hit x ray tmin tmax) y) Nothing hl
 
 scatter :: Material -> Ray -> HitRecord -> RandomState (Maybe (Vec3, Ray))
 scatter (Matte albedo) ray hr = do

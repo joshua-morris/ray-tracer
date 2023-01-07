@@ -5,7 +5,6 @@ module Main where
 import Rays.Types
 import Rays.Ray
 import Rays.Camera
-import Rays.PPM
 import Rays.Hittable
 import Rays.Sphere
 import Rays.Random
@@ -16,6 +15,27 @@ import Control.Lens
 import System.Random
 import Control.Monad
 import Control.Monad.State.Lazy
+import Codec.Picture
+
+aspectRatio :: Float
+aspectRatio = 3.0/2.0
+
+width :: Int
+width = 400
+
+height :: Int
+height = round $ (fromIntegral width)/aspectRatio
+
+samples :: Int
+samples = 200
+
+channel :: Float -> Int
+channel = floor . (255*) . min 1 . max 0
+
+toPixel :: Vec3 -> PixelRGB8
+toPixel v = PixelRGB8 r g b
+  where
+    V3 r g b = (fromIntegral . channel) <$> v
 
 rayColour :: Hittable a => Ray -> [a] -> Int -> RandomState Vec3
 rayColour ray@(Ray _ dir) hl depth = case hitAll hl ray 0.001 Nothing of
@@ -29,18 +49,16 @@ rayColour ray@(Ray _ dir) hl depth = case hitAll hl ray 0.001 Nothing of
             V3 _ y _ = normalize dir
             t_ = 0.5*(y + 1)
 
-makeImage :: Hittable a => [a] -> Float -> Float -> Camera -> Int -> RandomState Image
-makeImage hl height width camera samplesPerPixel =
-  forM [[(i,j) | i <- [0..width-1]] | j <- [height-1,height-2..0]] $ \l -> do
-    forM l $ \(x,y) -> do
-      cols <- forM [1..samplesPerPixel] $ \_ -> do
-        r1 <- getUniformlyInRange (0,1)
-        r2 <- getUniformlyInRange (0,1)
-        let u = (x+r1)/(width-1)
-            v = (y+r2)/(height-1)
-        r <- makeRay u v camera
-        rayColour r hl 50
-      return $ (sum cols) / (fromIntegral samplesPerPixel)
+generator :: Hittable a => [a] -> Camera -> Int -> Int -> RandomState PixelRGB8
+generator hl camera x y = do
+  cols <- forM [1..samples] $ \_ -> do
+    r1 <- getUniformlyInRange (0,1)
+    r2 <- getUniformlyInRange (0,1)
+    let u = (fromIntegral x+r1)/(fromIntegral width-1)
+        v = (fromIntegral y+r2)/(fromIntegral height-1)
+    r <- makeRay u v camera
+    rayColour r hl 50
+  return $ toPixel $ (sum cols) / (fromIntegral samples)
 
 randomScene :: RandomState [Sphere]
 randomScene = do
@@ -76,21 +94,13 @@ randomScene = do
 
 main :: IO ()
 main = do
-  let aspectRatio = 3.0/2.0
-      imageWidth = 400
-      samplesPerPixel = 200
-      imageHeight = imageWidth / aspectRatio
-      lookFrom = (V3 13 2 3)
+  let lookFrom = (V3 13 2 3)
       lookAt = (V3 0 0 0)
       focusDist = 10.0
       aperture = 0.1
 
   gen <- initStdGen
-  let camera = evalState (cameraBuilder 20 aspectRatio lookFrom lookAt (V3 0 1 0) aperture focusDist) gen
-
-  gen2 <- initStdGen
-  let world = evalState randomScene gen2
-
-  gen3 <- initStdGen 
-  let image = evalState (makeImage world imageHeight imageWidth camera samplesPerPixel) gen3
-  savePPM "image.ppm" image
+  let (camera, gen2) = runState (cameraBuilder 20 aspectRatio lookFrom lookAt (V3 0 1 0) aperture focusDist) gen
+  let (world, gen3) = runState randomScene gen2
+  let image = generateImage (\x y -> evalState (generator world camera x (height-y)) gen3) width height
+  writePng "image.png" image

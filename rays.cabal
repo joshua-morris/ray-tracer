@@ -53,4 +53,5 @@ executable rays
                     linear,
                     lens,
                     rays,
-                    mtl
+                    mtl,
+                    JuicyPixels
